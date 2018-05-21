@@ -1,0 +1,10 @@
+/node_modules
+/PSD
+/PP
+*.psd
+/.idea
+readme.md
+/public/assets/panos/*
+/source/assets/panos/*
+/public/panos/*
+/source/panos/*
