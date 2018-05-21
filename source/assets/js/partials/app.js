@@ -5,6 +5,20 @@ var globalCount = 0,
     globalPage = 0;
 
 jQuery(document).ready(function($) {
+    var parameters = getUrlVars();
+
+    if (parameters.page && !isNaN(+parameters.page))
+        globalPage = +parameters.page;
+    if (parameters.sortdirection && (parameters.sortdirection == 'lifo' || parameters.sortdirection == 'fifo'))
+        globalSortDirection = parameters.sortdirection;
+    if (parameters.sortby && (parameters.sortby == 'username' || parameters.sortby == 'email' || parameters.sortby == 'timestamp'))
+        globalSortBy = parameters.sortby;
+
+
+
+
+
+
     var forms = document.getElementsByClassName('needs-validation');
 
     var validation = Array.prototype.filter.call(forms, function(form) {
@@ -30,7 +44,27 @@ jQuery(document).ready(function($) {
     });
     getCount();
     retrieveData();
+
+    $(window).on("popstate", function(e) {
+        var backState = e.originalEvent.state;
+        globalPage = backState.page;
+        globalSortBy = backState.sortby;
+        globalSortDirection = backState.sortdirection;
+        retrieveData();
+    });
 });
+
+function getUrlVars() {
+    var vars = [],
+        hash;
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for (var i = 0; i < hashes.length; i++) {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
+}
 
 function addData(formData) {
     $.ajax({
@@ -59,7 +93,18 @@ function addData(formData) {
         );
 }
 
+function saveState()
+{
+    var state = {
+        page: globalPage,
+        sortdirection: globalSortDirection,
+        sortby: globalSortBy
+    };
+    history.pushState(state,'Гостевая книга','?' + $.param(state));
+}
+
 function retrieveData() {
+
 
     $('#paginator .paginator-previous').removeClass('disabled');
     $('#paginator .paginator-next').removeClass('disabled');
@@ -114,11 +159,11 @@ function getCount() {
             if (data.status === 'ok') {
                 globalCount = data.count;
                 var paginatorHtml = '';
-                paginatorHtml += '<li onclick="if (~this.className.search(\'disabled\')) return false; globalPage--; retrieveData();" class="page-item disabled paginator-previous"><a class="page-link" href="#" tabindex="-1">Previous</a></li>';
+                paginatorHtml += '<li onclick="event.preventDefault(); if (~this.className.search(\'disabled\')) return false; globalPage--; retrieveData(); saveState();" class="page-item ' + (globalPage == 0 ? 'disabled' : '') + ' paginator-previous"><a class="page-link" href="" tabindex="-1">Previous</a></li>';
                 for (var i = 0; i < (globalCount / 25); i++) {
-                    paginatorHtml += '<li onclick="globalPage = this.dataset.linknumber; retrieveData();" data-linknumber="' + i + '"  class="page-item paginator-number '+ (i == 0 ? 'active' : '')  +'"><a class="page-link" href="#">' + (i+1) + '</a></li>';
+                    paginatorHtml += '<li onclick="event.preventDefault(); globalPage = this.dataset.linknumber; retrieveData(); saveState();" data-linknumber="' + i + '"  class="page-item paginator-number '+ (i == globalPage ? 'active' : '')  +'"><a class="page-link" href="">' + (i+1) + '</a></li>';
                 }
-                paginatorHtml += '<li onclick="if (~this.className.search(\'disabled\')) return false; globalPage++; retrieveData();"  class="page-item ' + (globalCount > 25 ? '' : 'disabled') + ' paginator-next"><a class="page-link" href="#">Next</a></li>';
+                paginatorHtml += '<li onclick="event.preventDefault(); if (~this.className.search(\'disabled\')) return false; globalPage++; retrieveData(); saveState();"  class="page-item ' + (globalCount > 25 ? ((globalPage > ((globalCount / 25) - 1) && globalCount % 25 != 0) ? 'disabled' : '') : 'disabled') + ' paginator-next"><a class="page-link" href="">Next</a></li>';
                 $('#paginator').html(paginatorHtml);
             }
         });

@@ -10,7 +10,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Document</title>
+	<title>Гостевая книга</title>
 
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
@@ -34,13 +34,13 @@
                     <div class="input-group-prepend">
                         <label class="input-group-text" for="inputGroupSelect02">Сортировка по:</label>
                     </div>
-                    <select class="custom-select" id="inputGroupSelect02" onchange="globalSortBy=this.options[this.selectedIndex].value; globalPage = 0; retrieveData();">
+                    <select class="custom-select" id="inputGroupSelect02" onchange="globalSortBy=this.options[this.selectedIndex].value; globalPage = 0; retrieveData(); saveState();">
                         <option value="timestamp" selected>Дате добавления</option>
                         <option value="username">Имени пользователя</option>
                         <option value="email">Электронному адресу</option>
                     </select>
                     <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" onclick="flipDirection(); globalPage = 0; retrieveData();">Изменить очерёдность</button>
+                        <button class="btn btn-outline-secondary" type="button" onclick="flipDirection(); globalPage = 0; retrieveData(); saveState();">Изменить очерёдность</button>
                     </div>
                 </div>
 
